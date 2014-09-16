@@ -33,7 +33,10 @@ public class SearchTest {
         for (int i = 1; i < 100; i++) {
             for (List<Integer> list : lists) {
                 for (Searcher<Integer> searcher : searchers) {
-                    StdOut.printf("%d\t%f\t%s\t%s\n", i, test(searcher, list, i * 10000), list.getClass().getSimpleName(), searcher.getClass().getSimpleName());
+                    String s = String.format("%d\t%f\t%s\t%s\n", i, test(searcher, list, i * 10000), list.getClass().getSimpleName(), searcher.getClass().getSimpleName());
+                    s = s.replace(".", ",");
+                    StdOut.print(s);
+                    //StdOut.printf();
                 }
             }
         }
