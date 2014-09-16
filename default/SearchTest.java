@@ -1,6 +1,5 @@
 import edu.princeton.cs.introcs.StdOut;
 import edu.princeton.cs.introcs.StdRandom;
-import edu.princeton.cs.introcs.Stopwatch;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,7 +30,7 @@ public class SearchTest {
         searchers.add(sequenceForEach);
         searchers.add(builtin);
 
-        for (int i = 0; i < 100; i++) {
+        for (int i = 1; i < 100; i++) {
             for (List<Integer> list : lists) {
                 for (Searcher<Integer> searcher : searchers) {
                     StdOut.printf("%d\t%f\t%s\t%s\n", i, test(searcher, list, i * 10000), list.getClass().getSimpleName(), searcher.getClass().getSimpleName());
@@ -45,7 +44,7 @@ public class SearchTest {
     private static double test(Searcher<Integer> searcher, List<Integer> list, int size) {
         prepareForTest(list, size);
 
-        Stopwatch timer = new Stopwatch();
+        NanoStopwatch timer = new NanoStopwatch();
 
         searcher.search(list, 0);
 
@@ -94,6 +93,7 @@ class SequentialIndexSearch<T> implements Searcher<T> {
         }
         return -1;
     }
+
 }
 
 class SequentialForEachSearch<T> implements Searcher<T> {
