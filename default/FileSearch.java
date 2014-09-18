@@ -37,6 +37,12 @@ public class FileSearch {
 
 abstract class FileSearcher implements InputScanner<File> {
 
+    /**
+     * Searches for the target string using the directory or file supplied, and returns the
+     * @param file The file or directory to search through
+     * @param target The word to search for
+     * @return An array of Files containing the target string
+     */
     public abstract File[] search(File file, String target);
 
     /**
@@ -76,6 +82,12 @@ class RecursiveFileSearcher extends FileSearcher {
         return discoveredFiles.toArray(returnValue);
     }
 
+    /**
+     * Recu
+     * @param file
+     * @param target
+     * @param discoveredFiles
+     */
     private void searchHelper(final File file, final String target, final List<File> discoveredFiles) {
         if (file.isDirectory()) {
             File[] files = file.listFiles();
