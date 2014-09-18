@@ -30,14 +30,20 @@ public class SearchTest {
         searchers.add(sequenceForEach);
         searchers.add(builtin);
 
-        for (int i = 1; i < 100; i++) {
+        for (int i = 50; i < 51; i++) {
             for (List<Integer> list : lists) {
+
+                NanoStopwatch timer = new NanoStopwatch();
+                prepareForTest(list, i * 10000);
+                StdOut.println("Setup: " + timer.elapsedTime());
+
                 for (Searcher<Integer> searcher : searchers) {
                     String s = String.format("%d\t%f\t%s\t%s\n", i, test(searcher, list, i * 10000), list.getClass().getSimpleName(), searcher.getClass().getSimpleName());
                     s = s.replace(".", ",");
                     StdOut.print(s);
                     //StdOut.printf();
                 }
+
             }
         }
 
@@ -59,7 +65,9 @@ public class SearchTest {
         for (int i = 0; i < size; i++) {
             list.add(StdRandom.uniform(-size, size));
         }
+        NanoStopwatch timer = new NanoStopwatch();
         Collections.sort(list);
+        StdOut.println("Sorting: " + timer.elapsedTime());
     }
 
 
@@ -84,6 +92,7 @@ interface Searcher<T> {
      * return -1.
      */
     int search(List<T> list, T target);
+
 }
 
 
