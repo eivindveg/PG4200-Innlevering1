@@ -7,7 +7,6 @@ import java.util.*;
 
 
 public class SearchTest {
-
     private static final String outPrefix = "results";
 
     public static void main(String[] args) {
@@ -36,16 +35,20 @@ public class SearchTest {
         searchers.add(sequenceForEach);
         searchers.add(builtin);
         StdOut.printf("%-12s %-25s", "Size", "SortingTest");
+        out.print("size;SortingTest;");
         for(Searcher<Integer> searcher : searchers) {
             StdOut.printf("%-25s", searcher.getClass().getSimpleName());
+            out.print(searcher.getClass().getSimpleName() + ";");
         }
         StdOut.printf("%-25s", "List Implementation");
         StdOut.println();
+        out.print("List Implementation\n");
         for (int i = 1; i <= 10; i++) {
             int size = 10000 * (int)(Math.pow(i, 2));
 
             for (List<Integer> list : lists) {
                 StdOut.printf("%-13s", size);
+                out.print(size + ";");
                 final int numberOfTests = 3;
 
                 double totalTime = 0;
@@ -56,6 +59,7 @@ public class SearchTest {
                 }
                 double averageTime = totalTime / numberOfTests;
                 StdOut.printf("%-25.8s", averageTime);
+                out.print(averageTime + ";");
 
 
                 for (Searcher<Integer> searcher : searchers) {
@@ -75,13 +79,16 @@ public class SearchTest {
                         averageTime = totalTime / numberOfTests;
                         String timeString = String.format(Locale.US, "%f", averageTime);
                         StdOut.printf("%-25s", timeString);
+                        out.print(timeString + ";");
                     } else {
                         StdOut.printf("%-25s", "FAILED");
+                        out.print("FAILED;");
                     }
 
                 }
                 StdOut.printf("%-25s", list.getClass().getSimpleName());
                 StdOut.println();
+                out.print(list.getClass().getSimpleName() + ";\n");
             }
         }
 
