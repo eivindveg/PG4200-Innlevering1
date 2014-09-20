@@ -1,20 +1,26 @@
+import edu.princeton.cs.introcs.Out;
 import edu.princeton.cs.introcs.StdOut;
 import edu.princeton.cs.introcs.StdRandom;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.time.LocalDateTime;
+import java.util.*;
 
 
 public class SearchTest {
 
+    private static final String outPrefix = "results";
+
     public static void main(String[] args) {
+        LocalDateTime timeStamp = LocalDateTime.now();
+        String timeStampString = timeStamp.toString().replaceAll("(:|\\.)", "");
+        System.out.println(timeStampString);
+        Out out = new Out(outPrefix + timeStampString + ".csv");
+
         List<Integer> arrayList = new ArrayList<>();
         List<Integer> linkedList = new LinkedList<>();
 
-        Searcher<Integer> binary = new BinarySearch<>();
         Searcher<Integer> sequenceIndex = new SequentialIndexSearch<>();
+        Searcher<Integer> binary = new BinarySearch<>();
         Searcher<Integer> sequenceForEach = new SequentialForEachSearch<>();
         Searcher<Integer> builtin = new BuiltinSearch<>();
 
@@ -29,21 +35,53 @@ public class SearchTest {
         searchers.add(sequenceIndex);
         searchers.add(sequenceForEach);
         searchers.add(builtin);
+        StdOut.printf("%-12s %-25s", "Size", "SortingTest");
+        for(Searcher<Integer> searcher : searchers) {
+            StdOut.printf("%-25s", searcher.getClass().getSimpleName());
+        }
+        StdOut.printf("%-25s", "List Implementation");
+        StdOut.println();
+        for (int i = 1; i <= 10; i++) {
+            int size = 10000 * (int)(Math.pow(i, 2));
 
-        for (int i = 50; i < 51; i++) {
             for (List<Integer> list : lists) {
+                StdOut.printf("%-13s", size);
+                final int numberOfTests = 3;
 
-                NanoStopwatch timer = new NanoStopwatch();
-                prepareForTest(list, i * 10000);
-                StdOut.println("Setup: " + timer.elapsedTime());
+                double totalTime = 0;
+                for (int j = 1; j <= numberOfTests; j++) {
+                    NanoStopwatch timer = new NanoStopwatch();
+                    prepareForTest(list, size);
+                    totalTime += timer.elapsedTime();
+                }
+                double averageTime = totalTime / numberOfTests;
+                StdOut.printf("%-25.8s", averageTime);
+
 
                 for (Searcher<Integer> searcher : searchers) {
-                    String s = String.format("%d\t%f\t%s\t%s\n", i, test(searcher, list, i * 10000), list.getClass().getSimpleName(), searcher.getClass().getSimpleName());
-                    s = s.replace(".", ",");
-                    StdOut.print(s);
-                    //StdOut.printf();
-                }
+                    totalTime = 0;
 
+                    for (int j = 1; j <= numberOfTests; j++) {
+                        int valueToFind = prepareForTest(list, size);
+                        NanoStopwatch timer = new NanoStopwatch();
+                        if(searcher.search(list, valueToFind) == -1) {
+                            totalTime = -1;
+                            break;
+                        } else {
+                            totalTime += timer.elapsedTime();
+                        }
+                    }
+                    if(totalTime != -1) {
+                        averageTime = totalTime / numberOfTests;
+                        String timeString = String.format(Locale.US, "%f", averageTime);
+                        StdOut.printf("%-25s", timeString);
+                    } else {
+                        StdOut.printf("%-25s", "FAILED");
+                    }
+
+                }
+                StdOut.printf("%-25s", list.getClass().getSimpleName());
+                StdOut.println();
             }
         }
 
@@ -60,14 +98,14 @@ public class SearchTest {
         return timer.elapsedTime();
     }
 
-    private static void prepareForTest(List<Integer> list, int size) {
+    private static int prepareForTest(List<Integer> list, int size) {
         list.clear();
         for (int i = 0; i < size; i++) {
             list.add(StdRandom.uniform(-size, size));
         }
-        NanoStopwatch timer = new NanoStopwatch();
+        int valueToFind = list.get(StdRandom.uniform(0, size));
         Collections.sort(list);
-        StdOut.println("Sorting: " + timer.elapsedTime());
+        return valueToFind;
     }
 
 
@@ -111,7 +149,11 @@ class SequentialIndexSearch<T> implements Searcher<T> {
 class SequentialForEachSearch<T> implements Searcher<T> {
     public int search(List<T> list, T target) {
         int i = 0;
+        NanoStopwatch timer = new NanoStopwatch();
         for (T obj : list) {
+            if(timer.elapsedTime() > 60.0) {
+                return -1;
+            }
             if (obj.equals(target)) {
                 return i;
             }
