@@ -82,12 +82,6 @@ class RecursiveFileSearcher extends FileSearcher {
         return discoveredFiles.toArray(returnValue);
     }
 
-    /**
-     * Recu
-     * @param file
-     * @param target
-     * @param discoveredFiles
-     */
     private void searchHelper(final File file, final String target, final List<File> discoveredFiles) {
         if (file.isDirectory()) {
             File[] files = file.listFiles();

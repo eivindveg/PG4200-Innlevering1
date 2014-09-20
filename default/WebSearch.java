@@ -9,14 +9,14 @@ import java.util.List;
 
 public class WebSearch {
 
-    public static final String INITIAL_LINK = "http://nith.no";
-    public static final String TARGET = "Bedrifter";
+    public static final String INITIAL_LINK = "http://vg.no";
+    public static final String TARGET = "Petter";
 
     public static void main(String[] args) throws MalformedURLException {
         UrlSearcher searcher = new UrlSearcher();
         NanoStopwatch timer = new NanoStopwatch();
 
-        URL[] linksWithTarget = searcher.search(new URL(INITIAL_LINK), TARGET.toLowerCase(), 500);
+        URL[] linksWithTarget = searcher.search(new URL(INITIAL_LINK), TARGET.toLowerCase(), 100);
         StdOut.println(searcher.getClass().getSimpleName() + " spent " + timer.elapsedTime() + " seconds to find \"" +
                 TARGET + "\" in these links: ");
         for (URL url : linksWithTarget) {
@@ -39,9 +39,10 @@ class UrlSearcher implements InputScanner<URL> {
     /**
      * Searches a target URL recursively for the target string, up to a max number of links and returns all the links
      * containing the target string as a word in the link or in its content body.
-     * @param url The link to search from
+     *
+     * @param url    The link to search from
      * @param target The word to search for
-     * @param max Max number of links to open
+     * @param max    Max number of links to open
      * @return An array of URLs containing all the links and pages matching the search
      */
     public URL[] search(URL url, String target, int max) {
@@ -80,24 +81,17 @@ class UrlSearcher implements InputScanner<URL> {
         }
 
         for (String word : strings) {
-
             if (word.startsWith(LINK_IDENTIFIER + "http")) {
-                String urlString = word.replace(LINK_IDENTIFIER, "");
-
-                String[] splits = urlString.split("\"(>|)");
+                String[] splits = word.replace(LINK_IDENTIFIER, "").split("\"(>|)");
                 if (splits[0] != null) {
-
-                    urlString = splits[0];
                     try {
-
-                        URL newLink = new URL(urlString);
+                        URL newLink = new URL(splits[0]);
                         if (!visited.contains(newLink)) {
-                            queue.enqueue(new URL(urlString));
+                            queue.enqueue(newLink);
                         }
                     } catch (MalformedURLException ignored) {
                     }
                 }
-
                 if (splits.length > 1 && splits[1] != null) {
                     word = splits[1];
                 }
@@ -109,6 +103,4 @@ class UrlSearcher implements InputScanner<URL> {
         }
         return foundTarget;
     }
-
-
 }
