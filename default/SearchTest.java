@@ -40,11 +40,14 @@ public class SearchTest {
 
         // Print headers for tests:
         StdOut.printf("%-12s %-25s", "Size", "SortingTest");
+        out.print("size;SortingTest;");
         for(Searcher<Integer> searcher : searchers) {
             StdOut.printf("%-25s", searcher.getClass().getSimpleName());
+            out.print(searcher.getClass().getSimpleName() + ";");
         }
         StdOut.printf("%-25s", "List Implementation");
         StdOut.println();
+        out.print("List Implementation\n");
 
         /*
             We want to run tests for exponentially incrementing values, but with not too large distances between number
@@ -60,6 +63,7 @@ public class SearchTest {
 
             for (List<Integer> list : lists) {
                 StdOut.printf("%-13s", size);
+				out.print(size + ";");
 
                 // Run each test 5 times.
                 final int numberOfTests = 5;
@@ -74,6 +78,7 @@ public class SearchTest {
                 }
                 double averageTime = totalTime / numberOfTests;
                 StdOut.printf("%-25.8s", averageTime);
+                out.print(averageTime + ";");
 
 
                 // Prepare for test, the measure the actual lookup
@@ -97,14 +102,17 @@ public class SearchTest {
                         averageTime = totalTime / numberOfTests;
                         String timeString = String.format(Locale.US, "%f", averageTime);
                         StdOut.printf("%-25s", timeString);
+                        out.print(timeString + ";");
                     } else {
                         StdOut.printf("%-25s", "FAILED");
+                        out.print("FAILED;");
                     }
 
                 }
                 // In the last column, output the list implementation's name
                 StdOut.printf("%-25s", list.getClass().getSimpleName());
                 StdOut.println();
+                out.print(list.getClass().getSimpleName() + ";\n");
             }
         }
 
@@ -188,6 +196,7 @@ class BinarySearch<T extends Comparable<T>> implements Searcher<T> {
         int low = 0;
         int high = list.size() - 1;
         int middle;
+        
         NanoStopwatch timer = new NanoStopwatch();
         while (low <= high) {
             if(timer.elapsedTime() > 20.0) {
