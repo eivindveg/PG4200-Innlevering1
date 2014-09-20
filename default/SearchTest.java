@@ -39,8 +39,8 @@ public class SearchTest {
         searchers.add(builtin);
 
         // Print headers for tests:
-        StdOut.printf("%-12s %-25s", "Size", "SortingTest");
-        out.print("size;SortingTest;");
+        StdOut.printf("%-12s %-25s", "Size", "ListSetup");
+        out.print("Size;ListSetup;");
         for (Searcher<Integer> searcher : searchers) {
             StdOut.printf("%-25s", searcher.getClass().getSimpleName());
             out.print(searcher.getClass().getSimpleName() + ";");
@@ -53,11 +53,11 @@ public class SearchTest {
             We want to run tests for exponentially incrementing values, but with not too large distances between number
             When running the tests, we first test the time it takes to set up the list, then we grab a random number
             from the list and assign the searcher to find that number. Because this can create dramatically biased and
-            random results, we run this tests five times, with a different number each time, then take the average of the
-            test duration. We also fail the test if it takes longer than 20 seconds to find the assigned number in any
+            random results, we run this tests hundred times, with a different number each time, then take the average of the
+            test duration. We also fail the test if it takes longer than 10 seconds to find the assigned number in any
             one test cycle.
          */
-        for (int i = 1; i <= 10; i++) {
+        for (int i = 1; i <= 20; i++) {
             // Size is 10000 multiplied with the i squared, ie 10,000, 40,000, 90,000
             int size = 10000 * (int) (Math.pow(i, 2));
 
@@ -66,18 +66,19 @@ public class SearchTest {
                 out.print(size + ";");
 
                 // Run each test 5 times.
-                final int numberOfTests = 5;
+                final int numberOfTests = 100;
 
                 double totalTime = 0;
 
                 // Run a measured test setup and calculate the average
                 for (int j = 1; j <= numberOfTests; j++) {
                     NanoStopwatch timer = new NanoStopwatch();
-                    prepareForTest(list, size);
+                    setup(list, size);
                     totalTime += timer.elapsedTime();
                 }
                 double averageTime = totalTime / numberOfTests;
-                StdOut.printf("%-25.8s", averageTime);
+                String timeString = String.format(Locale.US, "%f", averageTime);
+                StdOut.printf("%-25s", timeString);
                 out.print(averageTime + ";");
 
 
@@ -90,17 +91,17 @@ public class SearchTest {
                         NanoStopwatch timer = new NanoStopwatch();
                         // Check if the test failed to find the value, and abort if failed.
                         // (Our lifespans are measured in years, not centuries)
-                        if (searcher.search(list, valueToFind) == -1) {
-                            totalTime = -1;
+                        if (searcher.search(list, valueToFind) == -1.0) {
+                            totalTime = -1.0;
                             break;
                         } else {
                             totalTime += timer.elapsedTime();
                         }
                     }
-                    if (totalTime != -1) {
+                    if (totalTime != -1.0) {
                         // If the test didn't fail, calculate the average time and print it
                         averageTime = totalTime / numberOfTests;
-                        String timeString = String.format(Locale.US, "%f", averageTime);
+                        timeString = String.format(Locale.US, "%f", averageTime);
                         StdOut.printf("%-25s", timeString);
                         out.print(timeString + ";");
                     } else {
@@ -127,13 +128,17 @@ public class SearchTest {
      * @return The given value to search for after preparation
      */
     private static int prepareForTest(List<Integer> list, int size) {
+        setup(list, size);
+        int valueToFind = list.get(StdRandom.uniform(0, size));
+        Collections.sort(list);
+        return valueToFind;
+    }
+
+    private static void setup(List<Integer> list, int size) {
         list.clear();
         for (int i = 0; i < size; i++) {
             list.add(StdRandom.uniform(-size, size));
         }
-        int valueToFind = list.get(StdRandom.uniform(0, size));
-        Collections.sort(list);
-        return valueToFind;
     }
 
 }
@@ -157,7 +162,7 @@ class SequentialIndexSearch<T> implements Searcher<T> {
     public int search(List<T> list, T target) {
         NanoStopwatch timer = new NanoStopwatch();
         for (int i = 0; i < list.size(); i++) {
-            if (timer.elapsedTime() > 20.0) {
+            if (timer.elapsedTime() > 10.0) {
                 return -1;
             }
             if (list.get(i).equals(target))
@@ -173,7 +178,7 @@ class SequentialForEachSearch<T> implements Searcher<T> {
         int i = 0;
         NanoStopwatch timer = new NanoStopwatch();
         for (T obj : list) {
-            if (timer.elapsedTime() > 20.0) {
+            if (timer.elapsedTime() > 10.0) {
                 return -1;
             }
             if (obj.equals(target)) {
@@ -200,7 +205,7 @@ class BinarySearch<T extends Comparable<T>> implements Searcher<T> {
 
         NanoStopwatch timer = new NanoStopwatch();
         while (low <= high) {
-            if (timer.elapsedTime() > 20.0) {
+            if (timer.elapsedTime() > 10.0) {
                 return -1;
             }
             middle = (low + high) / 2;

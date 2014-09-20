@@ -46,7 +46,7 @@ class UrlSearcher implements InputScanner<URL> {
      * @return An array of URLs containing all the links and pages matching the search
      */
     public URL[] search(URL url, String target, int max) {
-        ArrayList<URL> targetFoundAt = new ArrayList<>();
+        final ArrayList<URL> targetFoundAt = new ArrayList<>();
         queue.enqueue(url);
 
         while (!queue.isEmpty() && visited.size() <= max) {
