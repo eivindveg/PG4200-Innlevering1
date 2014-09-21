@@ -73,7 +73,7 @@ public class SearchTest {
                 // Run a measured test setup and calculate the average
                 for (int j = 1; j <= numberOfTests; j++) {
                     NanoStopwatch timer = new NanoStopwatch();
-                    setup(list, size);
+                    setupList(list, size);
                     totalTime += timer.elapsedTime();
                 }
                 double averageTime = totalTime / numberOfTests;
@@ -128,13 +128,13 @@ public class SearchTest {
      * @return The given value to search for after preparation
      */
     private static int prepareForTest(List<Integer> list, int size) {
-        setup(list, size);
+        setupList(list, size);
         int valueToFind = list.get(StdRandom.uniform(0, size));
         Collections.sort(list);
         return valueToFind;
     }
 
-    private static void setup(List<Integer> list, int size) {
+    private static void setupList(List<Integer> list, int size) {
         list.clear();
         for (int i = 0; i < size; i++) {
             list.add(StdRandom.uniform(-size, size));
