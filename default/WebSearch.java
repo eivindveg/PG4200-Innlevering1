@@ -5,7 +5,8 @@ import edu.princeton.cs.introcs.StdOut;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 public class WebSearch {
 
@@ -16,7 +17,7 @@ public class WebSearch {
         UrlSearcher searcher = new UrlSearcher();
         NanoStopwatch timer = new NanoStopwatch();
 
-        URL[] linksWithTarget = searcher.search(new URL(INITIAL_LINK), TARGET.toLowerCase(), 100);
+        URL[] linksWithTarget = searcher.search(new URL(INITIAL_LINK), TARGET.toLowerCase(), 1000);
         StdOut.println(searcher.getClass().getSimpleName() + " spent " + timer.elapsedTime() + " seconds to find \"" +
                 TARGET + "\" in these links: ");
         for (URL url : linksWithTarget) {
@@ -27,13 +28,14 @@ public class WebSearch {
 
 class UrlSearcher implements InputScanner<URL> {
 
-    private final List<URL> visited;
+    private final Set<URL> discovered;
     private final Queue<URL> queue;
     public static final String LINK_IDENTIFIER = "href=\"";
+    private int max;
 
     public UrlSearcher() {
         queue = new Queue<>();
-        visited = new ArrayList<>();
+        discovered = new HashSet<>();
     }
 
     /**
@@ -46,16 +48,17 @@ class UrlSearcher implements InputScanner<URL> {
      * @return An array of URLs containing all the links and pages matching the search
      */
     public URL[] search(URL url, String target, int max) {
+        this.max = max;
         final ArrayList<URL> targetFoundAt = new ArrayList<>();
         queue.enqueue(url);
 
-        while (!queue.isEmpty() && visited.size() <= max) {
+        while (!queue.isEmpty()) {
             final URL link = queue.dequeue();
-            StdOut.println(visited.size());
+            StdOut.println(discovered.size());
+            discovered.add(url);
             if (this.scan(link, target)) {
                 targetFoundAt.add(link);
             }
-            visited.add(link);
         }
 
         URL[] returnArray = new URL[targetFoundAt.size()];
@@ -81,15 +84,33 @@ class UrlSearcher implements InputScanner<URL> {
         }
 
         for (String word : strings) {
+            // If the word can be identified as a link
             if (word.startsWith(LINK_IDENTIFIER + "http")) {
+
+                /*
+                    Prepares the link for construction into a URL. First it replaces the link identifier, typically
+                    a string like href=", however this is only valid for the beginning. We later use a split to remove the
+                    " following the actual URL, as well as possibly a tag closure like >. The reason for implementing this
+                    with split, is that we want to preserve the word immediately following the tag closure if applicable.
+                    This is because this may be a word matching target, so we later replace word with the result of that
+                    split where applicable.
+                 */
                 String[] splits = word.replace(LINK_IDENTIFIER, "").split("\"(>|)");
                 if (splits[0] != null) {
+                    splits[0] = splits[0].replace("&amp;", "&");
                     try {
                         URL newLink = new URL(splits[0]);
-                        if (!visited.contains(newLink)) {
+
+                        // Don't enqueue the link if we've already discovered it.
+                        if (!discovered.contains(newLink) && discovered.size() < max) {
                             queue.enqueue(newLink);
+                            discovered.add(newLink);
                         }
                     } catch (MalformedURLException ignored) {
+                        // We have already turned the string in question into a valid link. It should not be identified
+                        // as a link if it does not conform to the above statements. It could still be saved with more
+                        // complex parsing, but we don't wish to expend resources parsing javascripts or by analysing
+                        // patterns to determine what to fix.
                     }
                 }
                 if (splits.length > 1 && splits[1] != null) {
