@@ -1,11 +1,11 @@
 import edu.princeton.cs.algorithms.Queue;
+import edu.princeton.cs.algorithms.Stack;
 import edu.princeton.cs.introcs.In;
 import edu.princeton.cs.introcs.StdOut;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Stack;
 
 public class FileSearch {
 
@@ -103,7 +103,7 @@ class StackFileSearcher extends FileSearcher {
         Stack<File> searchStack = new Stack<>();
 
         searchStack.push(file);
-        while (!searchStack.empty()) {
+        while (!searchStack.isEmpty()) {
             this.searchHelper(target, searchStack, discoveredFiles);
         }
 
