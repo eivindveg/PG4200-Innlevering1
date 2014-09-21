@@ -118,6 +118,7 @@ class UrlSearcher implements InputScanner<URL> {
                 }
             }
 
+            // Make sure we check for lower case values when matching words.
             if (word.toLowerCase().equals(target) || word.toLowerCase().contains(target)) {
                 foundTarget = true;
             }
